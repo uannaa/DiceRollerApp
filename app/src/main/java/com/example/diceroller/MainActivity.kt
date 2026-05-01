@@ -229,25 +229,24 @@ fun DiceWithButtonAndImage(
                     coroutineScope.launch {
                         isRolling = true
 
-                        // Spin + bounce in parallelo
-                        launch {
+                        val rotationJob = launch {
                             rotation.animateTo(
                                 targetValue = rotation.value + 720f,
-                                animationSpec = tween(
-                                    durationMillis = 700,
-                                    easing = FastOutSlowInEasing
-                                )
+                                animationSpec = tween(700, easing = FastOutSlowInEasing)
                             )
+                            rotation.snapTo(rotation.value % 360f)
                         }
-                        launch {
+                        val scaleJob = launch {
                             scale.animateTo(1.25f, animationSpec = tween(200))
                             scale.animateTo(0.9f, animationSpec = tween(150))
                             scale.animateTo(1f, animationSpec = tween(150))
                         }
 
-                        // Aggiorna il risultato a metà animazione
                         delay(350)
                         result = diceRange.random()
+
+                        rotationJob.join()
+                        scaleJob.join()
 
                         isRolling = false
                     }
